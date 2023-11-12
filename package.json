@@ -5,6 +5,7 @@
   "main": "server.ts",
   "scripts": {
     "build": "tsc",
+	"dev": "node ./build/server.js",
     "start": "tsc && npm run dev"
   },
   "repository": {

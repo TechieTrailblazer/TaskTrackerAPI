@@ -1,6 +1,8 @@
-export default {
-	HOST: 'localhost',
-	USER: 'root',
-	PASSWORD: 'mysql123',
-	DB: 'TestDB',
+import { PoolOptions } from 'mysql2/promise';
+
+export const access: PoolOptions = {
+	host: 'localhost',
+	user: 'root',
+	password: 'mysql123',
+	database: 'TestDB',
 };

@@ -1,6 +1,8 @@
-import { ResultSetHeader } from 'mysql2';
+import { access } from '../config/db.config';
+import MySQL from '../db/mysql';
 import User from '../models/user.model';
-import connection from '../db';
+
+const mysql = new MySQL(access);
 
 interface IUserRepository {
 	save(user: User): Promise<User>;
@@ -12,79 +14,50 @@ interface IUserRepository {
 }
 
 class UserRepository implements IUserRepository {
-	save(user: User): Promise<User> {
-		return new Promise((resolve, reject) => {
-			connection.query<ResultSetHeader>(
-				'INSERT INTO students (name, email) VALUES(?,?)',
-				[user.name, user.email || false],
-				(err, res) => {
-					if (err) reject(err);
-					else
-						this.retrieveById(res.insertId)
-							.then((user) => resolve(user!))
-							.catch(reject);
-				}
-			);
-		});
+	async save(user: User): Promise<User> {
+		const [result] = await mysql.executeResult('INSERT INTO students (name, email) VALUES(?, ?)', [
+			user.name,
+			user.email || false,
+		]);
+		return this.retrieveById(result.insertId);
 	}
 
-	retrieveAll(searchParams: { name?: string; email?: string }): Promise<User[]> {
+	async retrieveAll(searchParams: { name?: string; email?: string }): Promise<User[]> {
 		let query: string = 'SELECT * FROM students';
 		let condition: string = '';
 
-		if (searchParams?.name) condition += `Name LIKE '${searchParams.name}%'`;
+		if (searchParams?.name) condition += `LOWER(name) LIKE '%${searchParams.name}%'`;
 
-		if (searchParams?.email) condition += `Email LIKE '${searchParams.email}'`;
+		if (searchParams?.email) condition += `LOWER(email) LIKE '%${searchParams.email}%'`;
 
 		if (condition.length) query += ' WHERE ' + condition;
 
-		return new Promise((resolve, reject) => {
-			// TODO:вынести connection.query в отдельный класс
-			connection.query<User[]>(query, (err, res) => {
-				if (err) reject(err);
-				else resolve(res);
-			});
-		});
+		const [users] = await mysql.queryRows(query);
+		return users;
 	}
 
-	retrieveById(userId: number): Promise<User> {
-		return new Promise((resolve, reject) => {
-			connection.query<User[]>('SELECT * FROM students WHERE id = ?', [userId], (err, res) => {
-				if (err) reject(err);
-				else resolve(res?.[0]);
-			});
-		});
+	async retrieveById(userId: number): Promise<User> {
+		const [user] = await mysql.queryRows('SELECT * FROM students WHERE id = ?', [userId]);
+		return user?.[0];
 	}
 
-	update(user: User): Promise<number> {
-		return new Promise((resolve, reject) => {
-			connection.query<ResultSetHeader>(
-				'UPDATE students SET name = ?, email = ? WHERE id = ?',
-				[user.name, user.email, user.id],
-				(err, res) => {
-					if (err) reject(err);
-					else resolve(res.affectedRows);
-				}
-			);
-		});
+	async update(user: User): Promise<number> {
+		const [result] = await mysql.executeResult('UPDATE students SET name = ?, email = ? WHERE id = ?', [
+			user.name,
+			user.email,
+			user.id,
+		]);
+		return result.affectedRows;
 	}
 
-	delete(userId: number): Promise<number> {
-		return new Promise((resolve, reject) => {
-			connection.query<ResultSetHeader>('DELETE FROM students WHERE id = ?', [userId], (err, res) => {
-				if (err) reject(err);
-				else resolve(res.affectedRows);
-			});
-		});
+	async delete(userId: number): Promise<number> {
+		const [result] = await mysql.executeResult('DELETE FROM students WHERE id = ?', [userId]);
+		return result.affectedRows;
 	}
 
-	deleteAll(): Promise<number> {
-		return new Promise((resolve, reject) => {
-			connection.query<ResultSetHeader>('DELETE FROM students', (err, res) => {
-				if (err) reject(err);
-				else resolve(res.affectedRows);
-			});
-		});
+	async deleteAll(): Promise<number> {
+		const [result] = await mysql.executeResult('DELETE FROM students');
+		return result.affectedRows;
 	}
 }
 

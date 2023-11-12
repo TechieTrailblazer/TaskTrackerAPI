@@ -1,6 +1,6 @@
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket } from 'mysql2/promise';
 
-export default interface User extends RowDataPacket {
+export default interface IUser extends RowDataPacket {
 	id?: number;
 	name?: string;
 	email?: string;

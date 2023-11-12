@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import user from '../models/user.model';
+import IUser from '../models/user.model';
 import userRepository from '../repositories/user.repository';
 
 export default class UserController {
@@ -12,7 +12,7 @@ export default class UserController {
 		}
 
 		try {
-			const user: user = req.body;
+			const user: IUser = req.body;
 			const savedUser = await userRepository.save(user);
 
 			res.status(201).send(savedUser);
@@ -25,8 +25,10 @@ export default class UserController {
 	}
 
 	async findAll(req: Request, res: Response) {
+		const name = typeof req.query.name === 'string' ? req.query.name : '';
+		const email = typeof req.query.email === 'string' ? req.query.email : '';
 		try {
-			const users = await userRepository.retrieveAll({});
+			const users = await userRepository.retrieveAll({ name: name, email: email });
 			if (users.length === 0) {
 				res.status(404).send({ message: 'No users found.' });
 			} else {
@@ -58,7 +60,7 @@ export default class UserController {
 	}
 
 	async update(req: Request, res: Response) {
-		const user: user = req.body;
+		const user: IUser = req.body;
 		user.id = parseInt(req.params.id);
 
 		try {
