@@ -1,8 +1,8 @@
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket } from 'mysql2/promise';
 
-export default interface Homework extends RowDataPacket {
+export interface IHomework extends RowDataPacket {
 	id?: number;
-	student_id?: string;
+	student_id?: number;
 	task_description?: string;
 	deadline?: Date;
 }

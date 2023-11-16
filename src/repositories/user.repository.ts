@@ -1,20 +1,20 @@
 import { access } from '../config/db.config';
 import MySQL from '../db/mysql';
-import User from '../models/user.model';
+import { IUser } from '../models/user.model';
 
 const mysql = new MySQL(access);
 
 interface IUserRepository {
-	save(user: User): Promise<User>;
-	retrieveAll(searchParams: { name: string; published: boolean }): Promise<User[]>;
-	retrieveById(userId: number): Promise<User | undefined>;
-	update(user: User): Promise<number>;
+	save(user: IUser): Promise<IUser>;
+	retrieveAll(searchParams: { name: string; email: string }): Promise<IUser[]>;
+	retrieveById(userId: number): Promise<IUser | undefined>;
+	update(user: IUser): Promise<number>;
 	delete(userId: number): Promise<number>;
 	deleteAll(): Promise<number>;
 }
 
 class UserRepository implements IUserRepository {
-	async save(user: User): Promise<User> {
+	async save(user: IUser): Promise<IUser> {
 		const [result] = await mysql.executeResult('INSERT INTO students (name, email) VALUES(?, ?)', [
 			user.name,
 			user.email || false,
@@ -22,7 +22,7 @@ class UserRepository implements IUserRepository {
 		return this.retrieveById(result.insertId);
 	}
 
-	async retrieveAll(searchParams: { name?: string; email?: string }): Promise<User[]> {
+	async retrieveAll(searchParams: { name?: string; email?: string }): Promise<IUser[]> {
 		let query: string = 'SELECT * FROM students';
 		let condition: string = '';
 
@@ -36,12 +36,12 @@ class UserRepository implements IUserRepository {
 		return users;
 	}
 
-	async retrieveById(userId: number): Promise<User> {
+	async retrieveById(userId: number): Promise<IUser> {
 		const [user] = await mysql.queryRows('SELECT * FROM students WHERE id = ?', [userId]);
 		return user?.[0];
 	}
 
-	async update(user: User): Promise<number> {
+	async update(user: IUser): Promise<number> {
 		const [result] = await mysql.executeResult('UPDATE students SET name = ?, email = ? WHERE id = ?', [
 			user.name,
 			user.email,

@@ -11,31 +11,19 @@ class UserRoutes {
 
 	intializeRoutes() {
 		// Create a new Student
-		this.router.post('/students', this.controller.create);
+		this.router.post('/', this.controller.create);
 
-		// Retrieve all Students
-		this.router.get('/students', this.controller.findAll);
+		// Retrieve all Students when have no arguments, or find by email or username with
+		this.router.get('/', this.controller.findAll);
 
-		// Retrieve a single Student with id
-		this.router.get('/students/:id', this.controller.findOne);
+		// Retrieve a single Student by id
+		this.router.get('/:id', this.controller.findOne);
 
 		// Update a Student with id
-		this.router.put('/students/:id', this.controller.update);
+		this.router.put('/:id', this.controller.update);
 
 		// Delete a Student with id
-		this.router.delete('/students/:id', this.controller.delete);
-
-		// Create a Homework Task for a Student
-		//this.router.post('/students/:id/homework_tasks', this.controller);
-
-		//// Get Homework Tasks for a Student
-		//this.router.get('/students/:id/homework_tasks', this.controller);
-
-		//// Update a Homework Task
-		//this.router.put('/homework_tasks/:id', this.controller);
-
-		//// Delete a Homework Task
-		//this.router.delete('/homework_tasks/:id', this.controller);
+		this.router.delete('/:id', this.controller.delete);
 	}
 }
 
