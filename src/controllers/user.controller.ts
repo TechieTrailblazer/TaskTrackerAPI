@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
-import userRepository from '../repositories/user.repository';
 import { IUser } from '../models/user.model';
+import { UserService } from '../services/user.service';
+
+const userService = new UserService();
 
 export default class UserController {
 	async create(req: Request, res: Response) {
@@ -13,7 +15,7 @@ export default class UserController {
 
 		try {
 			const user: IUser = req.body;
-			const savedUser = await userRepository.save(user);
+			const savedUser = await userService.create(user);
 
 			res.status(201).send(savedUser);
 		} catch (err) {
@@ -28,7 +30,7 @@ export default class UserController {
 		const name = typeof req.query.name === 'string' ? req.query.name : '';
 		const email = typeof req.query.email === 'string' ? req.query.email : '';
 		try {
-			const users = await userRepository.retrieveAll({ name: name, email: email });
+			const users = await userService.findAll({ name: name, email: email });
 			if (users.length === 0) {
 				res.status(404).send({ message: 'No users found.' });
 			} else {
@@ -45,7 +47,7 @@ export default class UserController {
 		const id: number = parseInt(req.params.id);
 
 		try {
-			const user = await userRepository.retrieveById(id);
+			const user = await userService.findOne(id);
 
 			if (user) res.status(200).send(user);
 			else
@@ -64,7 +66,7 @@ export default class UserController {
 		user.id = parseInt(req.params.id);
 
 		try {
-			const num = await userRepository.update(user);
+			const num = await userService.update(user);
 
 			if (num == 1) {
 				res.send({
@@ -86,7 +88,7 @@ export default class UserController {
 		const id: number = parseInt(req.params.id);
 
 		try {
-			const num = await userRepository.delete(id);
+			const num = await userService.delete(id);
 
 			if (num == 1) {
 				res.send({

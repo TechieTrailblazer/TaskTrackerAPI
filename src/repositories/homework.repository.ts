@@ -7,8 +7,8 @@ const mysql = new MySQL(access);
 interface IHomeworkRepository {
 	save(homework: IHomework): Promise<IHomework>;
 	retrieveAll(searchParams: { task_description: string }): Promise<IHomework[]>;
-	retrieveLastHomeworkByStudentId(homeworkId: number): Promise<IHomework | undefined>;
-	retrieveAllHomeworkByStudentId(student_id: number): Promise<IHomework[]>;
+	retrieveLastByStudentId(homeworkId: number): Promise<IHomework | undefined>;
+	retrieveAllByStudentId(student_id: number): Promise<IHomework[]>;
 	updateByTaskId(homework: IHomework): Promise<number>;
 	delete(task_id: number): Promise<number>;
 }
@@ -19,7 +19,7 @@ class HomeworkRepository implements IHomeworkRepository {
 			'INSERT INTO homework_tasks (student_id, task_description, deadline) VALUES(?, ?, ?)',
 			[homework.student_id, homework.task_description, homework.deadline || false]
 		);
-		return this.retrieveLastHomeworkByStudentId(result.insertId);
+		return this.retrieveLastByStudentId(result.insertId);
 	}
 
 	async retrieveAll(searchParams: { task_description?: string }): Promise<IHomework[]> {
@@ -35,14 +35,14 @@ class HomeworkRepository implements IHomeworkRepository {
 		return homework;
 	}
 
-	async retrieveLastHomeworkByStudentId(student_id: number): Promise<IHomework> {
+	async retrieveLastByStudentId(student_id: number): Promise<IHomework> {
 		const [homework] = await mysql.queryRows('SELECT * FROM homework_tasks WHERE student_id = ?', [
 			student_id,
 		]);
 		return homework?.[0];
 	}
 
-	async retrieveAllHomeworkByStudentId(student_id: number): Promise<IHomework[]> {
+	async retrieveAllByStudentId(student_id: number): Promise<IHomework[]> {
 		const [homework] = await mysql.queryRows('SELECT * FROM homework_tasks WHERE student_id = ?', [
 			student_id,
 		]);

@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
-import homeworkRepository from '../repositories/homework.repository';
 import { IHomework } from '../models/homework.model';
+import { HomeworkService } from '../services/homework.service';
+
+const homeworkService = new HomeworkService();
 
 export default class HomeworkController {
 	async create(req: Request, res: Response) {
@@ -13,7 +15,7 @@ export default class HomeworkController {
 
 		try {
 			const homework: IHomework = req.body;
-			const savedHomework = await homeworkRepository.save(homework);
+			const savedHomework = await homeworkService.create(homework);
 
 			res.status(201).send(savedHomework);
 		} catch (err) {
@@ -28,7 +30,7 @@ export default class HomeworkController {
 		const task_description =
 			typeof req.query.task_description === 'string' ? req.query.task_description : '';
 		try {
-			const homeworks = await homeworkRepository.retrieveAll({
+			const homeworks = await homeworkService.findAll({
 				task_description: task_description,
 			});
 			if (homeworks.length === 0) {
@@ -47,7 +49,7 @@ export default class HomeworkController {
 		const student_id: number = parseInt(req.params.student_id);
 
 		try {
-			const homework = await homeworkRepository.retrieveAllHomeworkByStudentId(student_id);
+			const homework = await homeworkService.findAllById(student_id);
 
 			if (homework) res.status(200).send(homework);
 			else
@@ -66,7 +68,7 @@ export default class HomeworkController {
 		homework.task_id = parseInt(req.params.task_id);
 
 		try {
-			const num = await homeworkRepository.updateByTaskId(homework);
+			const num = await homeworkService.update(homework);
 
 			if (num == 1) {
 				res.send({
@@ -88,7 +90,7 @@ export default class HomeworkController {
 		const task_id: number = parseInt(req.params.task_id);
 
 		try {
-			const num = await homeworkRepository.delete(task_id);
+			const num = await homeworkService.delete(task_id);
 
 			if (num == 1) {
 				res.send({
